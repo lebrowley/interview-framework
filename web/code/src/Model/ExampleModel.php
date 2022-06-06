@@ -4,13 +4,63 @@ declare(strict_types = 1);
 
 namespace Example\Model;
 
+use Mini\Controller\Exception\BadInputException;
 use Mini\Model\Model;
 
 /**
  * Example data.
  */
 class ExampleModel extends Model
-{
+{    
+    /**
+     * ExampleModel internal state
+     */
+    protected $created = null;
+    protected $code = null;
+    protected $description = null;
+    
+    /**
+     * Set ExampleModel internal state
+     *
+     * @param string $created     example created on
+     * @param string $code        example code
+     * @param string $description example description
+     * 
+     * @throws BadInputException if any of the parameters are not set
+     * 
+     */
+    public function setData(string $created, string $code, string $description) {
+
+        if (!$created) {
+            throw new BadInputException('Created value missing');
+        }
+        if (!$code) {
+            throw new BadInputException('Code value missing');
+        }
+        if (!$description) {
+            throw new BadInputException('Description value missing');
+        }
+
+        $this->created = $created;
+        $this->code = $code;
+        $this->description = $description;
+    }
+
+    /**
+     * Get ExampleModel internal state
+     * 
+     * @return array the ExampleModel internal state values converted to an array
+     */
+    public function getData():array {
+        $data = array(
+            'created' => $this->created,
+            'code' => $this->code,
+            'description' => $this->description
+        );
+
+        return $data;
+    }
+
     /**
      * Get example data by ID.
      *
@@ -45,10 +95,9 @@ class ExampleModel extends Model
      * @param string $code        example code
      * @param string $description example description
      *  
-     * @return int example id
+     * @return array the new record created
      */
-    public function create(string $created, string $code, string $description): int
-    {
+    public function create(): array {
         $sql = '
             INSERT INTO
                 ' . getenv('DB_SCHEMA') . '.master_example
@@ -64,14 +113,16 @@ class ExampleModel extends Model
             'title'  => 'Create example',
             'sql'    => $sql,
             'inputs' => [
-                $created,
-                $code,
-                $description
+                $this->created,
+                $this->code,
+                $this->description
             ]
         ]);
 
         $this->db->validateAffected();
 
-        return $id;
+        $record = $this->get($id);
+
+        return $record;
     }
 }

@@ -47,8 +47,10 @@ class ExampleController extends Controller
      * @param Request $request http request
      * 
      * @return string view template
+     * 
+     * @throws BadInputException if request doesn't contain required values
      */
-    public function createExample(Request $request): string
+    public function createExample(Request $request):string
     {
         if (! $code = $request->request->get('code')){
             throw new BadInputException('Example code missing');
@@ -56,10 +58,13 @@ class ExampleController extends Controller
 
         if (! $description = $request->request->get('description')) {
             throw new BadInputException('Example description missing');
+
         }
 
-        return $this->view->get(
-            $this->model->create(now(), $code, $description)
-        );
+        $this->model->setData(now(), $code, $description);
+
+        $newRecord = $this->model->create();
+        
+        return $this->view->get($this->model);
     }
 }

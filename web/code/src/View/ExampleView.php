@@ -4,8 +4,8 @@ declare(strict_types = 1);
 
 namespace Example\View;
 
-use Example\Model\ExampleModel;
 use Mini\Controller\Exception\BadInputException;
+use Example\Model\ExampleModel;
 
 /**
  * Example view builder.
@@ -13,39 +13,28 @@ use Mini\Controller\Exception\BadInputException;
 class ExampleView
 {
     /**
-     * Example data.
-     * 
-     * @var Example\Model\ExampleModel|null
+     * Note: I removed the initialization of the $model property via the constructor as it seemed unneccessary now that the ExampleModel is passed as a parameter to the get method
      */
-    protected $model = null;
-
-    /**
-     * Setup.
-     * 
-     * @param ExampleModel $model example data
-     */
-    public function __construct(ExampleModel $model)
-    {
-        $this->model = $model;
-    }
 
     /**
      * Get the example view to display its data.
      * 
-     * @param int $id example id
+     * @param ExampleModel $model the ExampleModel object
      * 
      * @return string view template
      *
-     * @throws BadInputException if no example data is returned
+     * @throws BadInputException if ExampleModel data is not set
      */
-    public function get(int $id): string
+    public function get(ExampleModel $model): string
     {
-        $data = $this->model->get($id);
+        $data = $model->getData();
 
-        if (!$data) {
-            throw new BadInputException('Unknown example ID');
+        foreach($data as $property) {
+            if(!isset($property)) {
+                throw new BadInputException($property.' value missing');
+            }
         }
-
+        
         return view('app/example/detail', $data);
     }
 }
